@@ -7,11 +7,13 @@ type DeptBudget = {
   debit: number
   credit: number
 }
-type PaymentDetails = {
-  swift: string
-  iBan: string
-  number: number,
-  correspondentBank: string
+class PaymentDetails {
+  constructor(
+    public swift: string,
+    public iBan: string,
+    public number: number,
+    public correspondentBank: string
+  ) {}
 }
 type AllEmployeTypes = Employe | PreHiredEmploye
 
@@ -56,7 +58,7 @@ class Departament {
       employe.changeDepartament(this)
       this.budget.credit += employe.salary
       this.employes.push(employe)
-    } else if (paymentDetails) {
+    } else if (Utils.isPaymentDetails(paymentDetails)) {
       const {firstName, lastName, salary} = employe
       const newEmploye = new Employe(firstName, lastName, salary, paymentDetails, this, EmployeStatus.Active)
       this.employes.push(newEmploye)
@@ -80,15 +82,19 @@ class PreHiredEmploye {
 class Employe { 
   private static idGenerator: number = 0
   readonly id: number
+  public paymentDetails: PaymentDetails
+
 
   constructor(
     readonly firstName: string,
     readonly lastName: string,
     public salary: number,
-    public paymentDetails: PaymentDetails,
+    paymentDetails: PaymentDetails,
     private departament: Departament,
     public status: EmployeStatus = EmployeStatus.Inactive
   ) {
+    const {swift, iBan, number, correspondentBank} = paymentDetails
+    this.paymentDetails = new PaymentDetails(swift, iBan, number, correspondentBank)
     this.id = Employe.idGenerator
     Employe.idGenerator += 1
   }
@@ -138,6 +144,9 @@ class Utils {
   }
   static isDepartament(entity: unknown): entity is Departament {
     return entity instanceof Departament
+  }
+  static isPaymentDetails(entity: unknown): entity is PaymentDetails {
+  return entity instanceof PaymentDetails
   }
 }
 
